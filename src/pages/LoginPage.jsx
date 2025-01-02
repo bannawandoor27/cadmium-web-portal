@@ -28,7 +28,7 @@ const LoginPage = () => {
 
       try {
         const response = await axios.post(
-          "https://cadmium.softwarescompound.in/login",
+          "https://cadmium.softwarescompound.in/organizations/login",
           loginData,
           {
             headers: { "Content-Type": "application/json" },
