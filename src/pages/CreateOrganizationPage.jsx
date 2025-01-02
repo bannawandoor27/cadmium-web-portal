@@ -2,8 +2,11 @@ import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const CreateOrganizationPage = () => {
+  const navigate = useNavigate();
+
   const formik = useFormik({
     initialValues: {
       orgName: "",
@@ -44,8 +47,11 @@ const CreateOrganizationPage = () => {
         );
 
         if (response.status === 200) {
-          setStatus("Organization created successfully! Please check your email to verify.");
-          resetForm();
+          setStatus("Organization created successfully! Redirecting to login...");
+          setTimeout(() => {
+            resetForm();
+            navigate("/"); // Navigate to the login page
+          }, 2000); // Wait for 2 seconds before redirecting
         }
       } catch (error) {
         if (error.response) {
