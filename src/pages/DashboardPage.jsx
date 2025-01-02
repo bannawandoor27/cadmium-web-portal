@@ -77,13 +77,10 @@ const DashboardPage = () => {
   };
 
   const handleLogout = () => {
-    // Clear localStorage
     localStorage.removeItem("organization_name");
     localStorage.removeItem("organization_id");
     localStorage.removeItem("cd_id");
     localStorage.removeItem("cd_secret");
-
-    // Redirect to login page
     navigate("/");
   };
 
@@ -97,151 +94,205 @@ const DashboardPage = () => {
   };
 
   const styles = {
-    container: {
+    pageContainer: {
+      minHeight: "100vh",
+      minWidth: "100vw",
+      backgroundColor: "#121212",
+      margin: 0,
+      padding: 0,
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "20px",
-      backgroundColor: "#121212", // Dark theme background
-      color: "#ffffff", // Light text color
+      color: "#ffffff",
       fontFamily: "Arial, sans-serif",
+      overflow: "auto",
+    },
+    container: {
+      flex: 1,
+      padding: "20px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "20px",
     },
     header: {
       display: "flex",
       justifyContent: "space-between",
-      width: "100%",
-      maxWidth: "1200px",
       alignItems: "center",
-      marginBottom: "20px",
-    },
-    logoutButton: {
-      padding: "10px 20px",
-      backgroundColor: "#ff6b6b",
-      color: "#ffffff",
-      border: "none",
-      borderRadius: "5px",
-      cursor: "pointer",
-      fontSize: "1rem",
-    },
-    settingsButton: {
-      padding: "10px 20px",
-      backgroundColor: "#1f78d1",
-      color: "#ffffff",
-      border: "none",
-      borderRadius: "5px",
-      cursor: "pointer",
-      fontSize: "1rem",
-      marginRight: "10px",
+      padding: "20px",
+      backgroundColor: "#1e1e1e",
+      borderBottom: "1px solid #333",
+      position: "sticky",
+      top: 0,
+      zIndex: 1000,
     },
     title: {
-      fontSize: "2.5rem",
-      fontWeight: "bold",
+      fontSize: "2rem",
+      margin: 0,
+      color: "#ffffff",
+    },
+    buttonContainer: {
+      display: "flex",
+      gap: "10px",
+    },
+    button: {
+      padding: "10px 20px",
+      fontSize: "1rem",
+      color: "#ffffff",
+      backgroundColor: "#1f78d1",
+      border: "none",
+      borderRadius: "4px",
+      cursor: "pointer",
+      transition: "background-color 0.2s",
+    },
+    logoutButton: {
+      backgroundColor: "#dc3545",
     },
     cardsContainer: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
       gap: "20px",
-      width: "100%",
-      maxWidth: "1200px",
+      padding: "20px",
     },
     card: {
       backgroundColor: "#1e1e1e",
       borderRadius: "8px",
       padding: "20px",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-      color: "#ffffff",
+      border: "1px solid #333",
     },
     cardTitle: {
-      fontSize: "1.5rem",
-      marginBottom: "10px",
+      fontSize: "1.25rem",
       fontWeight: "bold",
+      marginBottom: "15px",
+      color: "#ffffff",
     },
     cardInfo: {
-      margin: "5px 0",
-      fontSize: "1rem",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "10px",
+      color: "#cccccc",
     },
     copyButton: {
-      marginTop: "5px",
-      padding: "6px 10px",
-      backgroundColor: "#1f78d1",
+      padding: "5px 10px",
+      backgroundColor: "#2d3748",
       color: "#ffffff",
       border: "none",
-      borderRadius: "5px",
+      borderRadius: "4px",
       cursor: "pointer",
-      fontSize: "0.9rem",
+      fontSize: "0.875rem",
+      marginLeft: "10px",
     },
     deleteButton: {
-      marginTop: "10px",
-      padding: "8px 15px",
-      backgroundColor: "#ff6b6b",
+      width: "100%",
+      padding: "10px",
+      backgroundColor: "#dc3545",
       color: "#ffffff",
       border: "none",
-      borderRadius: "5px",
+      borderRadius: "4px",
       cursor: "pointer",
+      marginTop: "15px",
     },
     error: {
-      color: "#ff6b6b",
-      fontSize: "1.2rem",
+      color: "#dc3545",
+      textAlign: "center",
+      padding: "20px",
+      backgroundColor: "rgba(220, 53, 69, 0.1)",
+      borderRadius: "4px",
+      margin: "20px",
     },
     loader: {
-      fontSize: "1.5rem",
+      textAlign: "center",
+      padding: "40px",
+      color: "#ffffff",
+    },
+    noApps: {
+      textAlign: "center",
+      padding: "40px",
+      color: "#888888",
+      gridColumn: "1 / -1",
+    },
+    statValue: {
       fontWeight: "bold",
+      color: "#ffffff",
     },
   };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.pageContainer}>
       <div style={styles.header}>
         <h1 style={styles.title}>Dashboard</h1>
-        <div>
-          <button style={styles.settingsButton} onClick={goToSettings}>
+        <div style={styles.buttonContainer}>
+          <button 
+            style={styles.button}
+            onClick={goToSettings}
+            onMouseEnter={(e) => e.target.style.backgroundColor = "#1857a4"}
+            onMouseLeave={(e) => e.target.style.backgroundColor = "#1f78d1"}
+          >
             Settings
           </button>
-          <button style={styles.logoutButton} onClick={handleLogout}>
+          <button 
+            style={{...styles.button, ...styles.logoutButton}}
+            onClick={handleLogout}
+            onMouseEnter={(e) => e.target.style.backgroundColor = "#bd2130"}
+            onMouseLeave={(e) => e.target.style.backgroundColor = "#dc3545"}
+          >
             Logout
           </button>
         </div>
       </div>
-      {loading ? (
-        <div style={styles.loader}>Loading applications...</div>
-      ) : error ? (
-        <div style={styles.error}>{error}</div>
-      ) : (
-        <div style={styles.cardsContainer}>
-          {applications.length === 0 ? (
-            <div>No applications found for this organization.</div>
-          ) : (
-            applications.map((app) => (
-              <div key={app.id} style={styles.card}>
-                <div style={styles.cardTitle}>{app.application_name}</div>
-                <div style={styles.cardInfo}>
-                  <strong>ID:</strong> {app.id}{" "}
+
+      <div style={styles.container}>
+        {loading ? (
+          <div style={styles.loader}>Loading applications...</div>
+        ) : error ? (
+          <div style={styles.error}>{error}</div>
+        ) : (
+          <div style={styles.cardsContainer}>
+            {applications.length === 0 ? (
+              <div style={styles.noApps}>No applications found for this organization.</div>
+            ) : (
+              applications.map((app) => (
+                <div key={app.id} style={styles.card}>
+                  <div style={styles.cardTitle}>{app.application_name}</div>
+                  <div style={styles.cardInfo}>
+                    <span>ID:</span>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span>{app.id}</span>
+                      <button
+                        style={styles.copyButton}
+                        onClick={() => handleCopy(app.id)}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = "#3d4a5f"}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = "#2d3748"}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                  <div style={styles.cardInfo}>
+                    <span>Total Logs:</span>
+                    <span style={styles.statValue}>{app.total_logs}</span>
+                  </div>
+                  <div style={styles.cardInfo}>
+                    <span>Resolved Logs:</span>
+                    <span style={styles.statValue}>{app.resolved_logs}</span>
+                  </div>
+                  <div style={styles.cardInfo}>
+                    <span>Today's Logs:</span>
+                    <span style={styles.statValue}>{app.todays_logs}</span>
+                  </div>
                   <button
-                    style={styles.copyButton}
-                    onClick={() => handleCopy(app.id)}
+                    style={styles.deleteButton}
+                    onClick={() => handleDelete(app.id)}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = "#bd2130"}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = "#dc3545"}
                   >
-                    Copy
+                    Delete Application
                   </button>
                 </div>
-                <div style={styles.cardInfo}>Total Logs: {app.total_logs}</div>
-                <div style={styles.cardInfo}>
-                  Resolved Logs: {app.resolved_logs}
-                </div>
-                <div style={styles.cardInfo}>
-                  Today's Logs: {app.todays_logs}
-                </div>
-                <button
-                  style={styles.deleteButton}
-                  onClick={() => handleDelete(app.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-      )}
+              ))
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
