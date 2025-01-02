@@ -1,38 +1,63 @@
-import React, { useState } from "react";
+import React from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import axios from "axios";
 
 const CreateOrganizationPage = () => {
-  const [orgName, setOrgName] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
+  const formik = useFormik({
+    initialValues: {
+      orgName: "",
+      adminEmail: "",
+      adminPassword: "",
+    },
+    validationSchema: Yup.object({
+      orgName: Yup.string()
+        .min(3, "Organization name must be at least 3 characters")
+        .required("Organization name is required"),
+      adminEmail: Yup.string()
+        .email("Invalid email address")
+        .required("Admin email is required"),
+      adminPassword: Yup.string()
+        .min(8, "Password must be at least 8 characters")
+        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+        .matches(/\d/, "Password must contain at least one number")
+        .matches(/[@$!%*?&]/, "Password must contain at least one special character")
+        .required("Admin password is required"),
+    }),
+    onSubmit: async (values, { setSubmitting, resetForm, setStatus }) => {
+      const organizationData = {
+        org_name: values.orgName,
+        admin_email: values.adminEmail,
+        admin_password: values.adminPassword,
+      };
 
-  const handleCreateOrganization = async () => {
-    const organizationData = {
-      org_name: orgName,
-      admin_email: adminEmail,
-      admin_password: adminPassword,
-    };
+      try {
+        const response = await axios.post(
+          "https://cadmium.softwarescompound.in/organizations",
+          organizationData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-    console.log("Creating organization with data:", organizationData);
-
-    // Replace this with your API call
-    try {
-      const response = await fetch("https://your-api-endpoint/organizations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(organizationData),
-      });
-
-      if (response.ok) {
-        console.log("Organization created successfully!");
-      } else {
-        console.error("Failed to create organization:", await response.text());
+        if (response.status === 200) {
+          setStatus("Organization created successfully! Please check your email to verify.");
+          resetForm();
+        }
+      } catch (error) {
+        if (error.response) {
+          setStatus("Failed to create organization. Please try again.");
+        } else {
+          setStatus("An error occurred. Please try again later.");
+        }
+      } finally {
+        setSubmitting(false);
       }
-    } catch (error) {
-      console.error("Error creating organization:", error);
-    }
-  };
+    },
+  });
 
   const styles = {
     container: {
@@ -46,16 +71,23 @@ const CreateOrganizationPage = () => {
       color: "#ffffff", // Light text color
       fontFamily: "Arial, sans-serif",
     },
+    form: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      width: "100%", // Ensure it fills horizontally
+      maxWidth: "400px", // Constrain to a reasonable width
+    },
     title: {
       fontSize: "2.5rem",
       marginBottom: "30px",
       fontWeight: "bold",
     },
     input: {
-      marginBottom: "20px",
+      marginBottom: "10px",
       padding: "10px",
       fontSize: "1rem",
-      width: "300px",
+      width: "100%",
       borderRadius: "5px",
       border: "1px solid #ccc",
       backgroundColor: "#1e1e1e",
@@ -75,40 +107,64 @@ const CreateOrganizationPage = () => {
     buttonHover: {
       backgroundColor: "#005bb5",
     },
+    error: {
+      color: "#ff6b6b",
+      fontSize: "0.9rem",
+      marginBottom: "10px",
+    },
+    successMessage: {
+      marginTop: "20px",
+      fontSize: "1.2rem",
+      color: "#4caf50", // Success green color
+    },
   };
 
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Create Your Organization</h1>
-      <input
-        type="text"
-        style={styles.input}
-        placeholder="Enter Organization Name"
-        value={orgName}
-        onChange={(e) => setOrgName(e.target.value)}
-      />
-      <input
-        type="email"
-        style={styles.input}
-        placeholder="Enter Admin Email"
-        value={adminEmail}
-        onChange={(e) => setAdminEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        style={styles.input}
-        placeholder="Enter Admin Password"
-        value={adminPassword}
-        onChange={(e) => setAdminPassword(e.target.value)}
-      />
-      <button
-        style={styles.button}
-        onMouseEnter={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
-        onMouseLeave={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
-        onClick={handleCreateOrganization}
-      >
-        Create
-      </button>
+      <form style={styles.form} onSubmit={formik.handleSubmit}>
+        <input
+          type="text"
+          style={styles.input}
+          placeholder="Enter Organization Name"
+          {...formik.getFieldProps("orgName")}
+        />
+        {formik.touched.orgName && formik.errors.orgName && (
+          <div style={styles.error}>{formik.errors.orgName}</div>
+        )}
+        <input
+          type="email"
+          style={styles.input}
+          placeholder="Enter Admin Email"
+          {...formik.getFieldProps("adminEmail")}
+        />
+        {formik.touched.adminEmail && formik.errors.adminEmail && (
+          <div style={styles.error}>{formik.errors.adminEmail}</div>
+        )}
+        <input
+          type="password"
+          style={styles.input}
+          placeholder="Enter Admin Password"
+          {...formik.getFieldProps("adminPassword")}
+        />
+        {formik.touched.adminPassword && formik.errors.adminPassword && (
+          <div style={styles.error}>{formik.errors.adminPassword}</div>
+        )}
+        <button
+          type="submit"
+          style={styles.button}
+          disabled={formik.isSubmitting}
+          onMouseEnter={(e) =>
+            (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)
+          }
+          onMouseLeave={(e) =>
+            (e.target.style.backgroundColor = styles.button.backgroundColor)
+          }
+        >
+          {formik.isSubmitting ? "Creating..." : "Create"}
+        </button>
+        {formik.status && <div style={styles.successMessage}>{formik.status}</div>}
+      </form>
     </div>
   );
 };
